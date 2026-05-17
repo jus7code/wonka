@@ -1,314 +1,569 @@
 @extends('layouts.app')
 
 @section('header')
-    <header
-                class="flex justify-between items-center w-full px-6 py-3 h-16 sticky top-0 z-50 bg-stone-50 dark:bg-stone-900 text-amber-900 dark:text-amber-100 font-inter text-sm border-b border-stone-200 dark:border-stone-800 shadow-sm">
-                <div class="flex items-center gap-4 flex-1">
-                    <div class="relative w-full max-w-md">
-                        <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-stone-400"
-                            data-icon="search">search</span>
-                        <input
-                            class="w-full pl-10 pr-4 py-2 bg-stone-100 dark:bg-stone-800 border-none rounded-full focus:ring-2 focus:ring-amber-700/20 text-sm"
-                            placeholder="Search employees..." type="text" />
-                    </div>
-                </div>
-                <div class="flex items-center gap-2">
-                    <button class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors relative">
-                        <span class="material-symbols-outlined" data-icon="notifications">notifications</span>
-                        <span class="absolute top-2 right-2 w-2 h-2 bg-secondary rounded-full"></span>
-                    </button>
-                    <button class="p-2 rounded-full hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                        <span class="material-symbols-outlined" data-icon="settings">settings</span>
-                    </button>
-                    <div class="h-6 w-[1px] bg-stone-300 dark:bg-stone-700 mx-2"></div>
-                    <button
-                        class="px-4 py-2 rounded-lg text-amber-900 dark:text-amber-100 font-semibold hover:bg-stone-100 dark:hover:bg-stone-800 transition-colors">
-                        Help
-                    </button>
-                    <img alt="User profile" class="w-8 h-8 rounded-full ml-2 object-cover ring-2 ring-amber-900/10"
-                        data-alt="Professional headshot of a middle-aged male executive in a clean studio setting with warm lighting"
-                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuA3CVRzIygm11TQ3aDsfmh52EDTN4uXRhlNUN3XaI2g_pYJc1xD4Vh_NoTAojXEvdqcmpspab97OATZj3QKZ7zWEdmw2shFmJa7FDLOAszt9KwyS4K1NqjLHr768TjNXpU_ETneX5SWuuTZNqSEWqmagwDvJmYjypj44Rw5VmizMvoZzP0Gd5-w1nhrbKirof7DpZJHI1I8zv_Fo0uhLMELouQ25N3IdI7gdoT7CplzxWnwGJXD1ph8qEXAavN14Cb-vA1LtYq5Yg" />
-                </div>
-            </header>
+    <header class="bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-sm flex justify-between items-center w-full px-6 py-3 h-16 sticky top-0 z-50">
+        <div class="flex items-center gap-md">
+            <span class="text-xl font-bold text-amber-900 dark:text-amber-50 tracking-tight">{{ __('Artisanal Logistics') }}</span>
+        </div>
+        <div class="flex items-center gap-sm">
+        </div>
+    </header>
 @endsection
 
 @section('content')
-    <!-- Module Content -->
-            <div class="p-margin flex flex-col gap-lg">
-                <!-- Page Header & Action -->
-                <div class="flex justify-between items-end">
+    <div class="p-margin flex flex-col gap-lg">
+        
+        <!-- Alerts Block -->
+        @if (session('success'))
+            <div class="p-4 bg-green-50 border border-green-200 rounded-xl flex items-center gap-3 text-green-800 text-sm font-semibold shadow-sm animate-in fade-in duration-200">
+                <span class="material-symbols-outlined text-green-600 text-lg">check_circle</span>
+                <div>{{ session('success') }}</div>
+            </div>
+        @endif
+
+        @if (session('error'))
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl flex items-center gap-3 text-red-800 text-sm font-semibold shadow-sm animate-in fade-in duration-200">
+                <span class="material-symbols-outlined text-red-600 text-lg">error</span>
+                <div>{{ session('error') }}</div>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-800 text-sm space-y-1 shadow-sm">
+                <div class="flex items-center gap-2 font-bold mb-1">
+                    <span class="material-symbols-outlined text-red-600 text-lg">error</span>
+                    <span>{{ __('Por favor corrija los siguientes errores:') }}</span>
+                </div>
+                <ul class="list-disc list-inside pl-4 space-y-0.5 font-medium">
+                    @foreach ($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        @if (auth()->user()->role === 'admin')
+            <!-- ================= ADMIN LAYOUT ================= -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-primary">{{ __('Personal y Recursos Humanos') }}</h2>
+                    <p class="font-body-md text-body-md text-outline mt-1">{{ __('Administra roles de operarios, asignación de salarios, líneas de producción y turnos semanales.') }}</p>
+                </div>
+                <div class="flex gap-3 shrink-0">
+                    <button onclick="document.getElementById('assignShiftModal').classList.remove('hidden')"
+                        class="px-5 py-2.5 rounded-xl border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 font-bold transition-all flex items-center gap-2 text-xs shadow-sm">
+                        <span class="material-symbols-outlined text-xs">calendar_month</span>
+                        {{ __('Asignar Turno Semanal') }}
+                    </button>
+                    <button onclick="document.getElementById('hireModal').classList.remove('hidden')"
+                        class="bg-amber-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-800 transition-all flex items-center gap-2 text-xs shadow-md shadow-amber-900/10">
+                        <span class="material-symbols-outlined text-xs">person_add</span>
+                        {{ __('Contratar Operario') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
+                <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
                     <div>
-                        <h2 class="font-headline-lg text-headline-lg text-primary">Active Personnel</h2>
-                        <p class="font-body-md text-body-md text-outline mt-1">Manage employee roles, schedules, and factory
-                            floor distribution.</p>
+                        <p class="text-xs text-stone-400 font-bold uppercase tracking-wider">{{ __('Total Operarios') }}</p>
+                        <span class="text-3xl font-black text-amber-900 mt-2 block">{{ $trabajadores->count() }}</span>
                     </div>
-                    <div class="flex gap-3">
-                        <button
-                            class="px-6 py-2.5 rounded-lg border-2 border-secondary text-secondary font-bold hover:bg-secondary/5 transition-colors flex items-center gap-2">
-                            <span class="material-symbols-outlined text-sm" data-icon="calendar_month">calendar_month</span>
-                            Assign Shifts
-                        </button>
-                        <button
-                            class="bg-primary text-on-primary px-6 py-2.5 rounded-lg font-bold hover:opacity-90 transition-opacity flex items-center gap-2">
-                            <span class="material-symbols-outlined text-sm" data-icon="person_add">person_add</span>
-                            Hire Employee
-                        </button>
+                    <span class="material-symbols-outlined text-amber-900 text-3xl bg-amber-50 p-3 rounded-2xl">badge</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-stone-400 font-bold uppercase tracking-wider">{{ __('Solicitudes Pendientes') }}</p>
+                        <span class="text-3xl font-black text-amber-900 mt-2 block">{{ $solicitudes->where('estado', 'pendiente')->count() }}</span>
+                    </div>
+                    <span class="material-symbols-outlined text-amber-900 text-3xl bg-amber-50 p-3 rounded-2xl">pending_actions</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-stone-400 font-bold uppercase tracking-wider">{{ __('Líneas Activas') }}</p>
+                        <span class="text-3xl font-black text-amber-900 mt-2 block">{{ $lineas->count() }}</span>
+                    </div>
+                    <span class="material-symbols-outlined text-amber-900 text-3xl bg-amber-50 p-3 rounded-2xl">factory</span>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-stone-100 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-stone-400 font-bold uppercase tracking-wider">{{ __('Estado del Personal') }}</p>
+                        <span class="text-xs font-bold text-green-700 bg-green-50 px-3 py-1 rounded-full inline-block mt-3 border border-green-100">{{ __('100% Operativo') }}</span>
+                    </div>
+                    <span class="material-symbols-outlined text-amber-900 text-3xl bg-amber-50 p-3 rounded-2xl">verified_user</span>
+                </div>
+            </div>
+
+            <!-- Shift Requests Center -->
+            @if ($solicitudes->where('estado', 'pendiente')->count() > 0)
+                <div class="bg-amber-900/5 border border-amber-900/10 rounded-2xl p-6 space-y-4">
+                    <h3 class="font-bold text-amber-950 flex items-center gap-2">
+                        <span class="material-symbols-outlined">pending_actions</span>
+                        {{ __('Solicitudes de Turno Pendientes de Aprobación') }}
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        @foreach ($solicitudes->where('estado', 'pendiente') as $sol)
+                            <div class="bg-white p-4 border border-stone-100 rounded-xl flex flex-col justify-between gap-4 shadow-sm">
+                                <div class="space-y-1">
+                                    <div class="flex justify-between items-center">
+                                        <h4 class="font-bold text-stone-800 text-sm">{{ $sol->trabajador->nombre }} {{ $sol->trabajador->apellido }}</h4>
+                                        <span class="px-2 py-0.5 bg-amber-50 text-amber-800 text-[10px] font-bold rounded-full border border-amber-100 uppercase">
+                                            {{ $sol->tipo === 'cambio' ? 'Cambio' : 'Cancelación' }}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs text-stone-500">
+                                        <strong>Fecha Solicitada:</strong> {{ date('d M Y', strtotime($sol->fecha_deseada)) }}
+                                    </p>
+                                    @if ($sol->tipo === 'cambio')
+                                        <p class="text-xs text-stone-500">
+                                            <strong>Turno Propuesto:</strong> {{ ucfirst($sol->turnoDeseado->nombre ?? 'N/A') }}
+                                        </p>
+                                    @endif
+                                    @if ($sol->motivo)
+                                        <p class="text-xs text-stone-500 italic bg-stone-50 p-2 rounded-lg border border-stone-100 mt-2">
+                                            "{{ $sol->motivo }}"
+                                        </p>
+                                    @endif
+                                </div>
+                                <div class="flex gap-2 justify-end pt-2 border-t border-stone-100">
+                                    <form action="{{ route('hr.shift.reject', $sol->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-700 text-[11px] font-bold rounded-lg transition-colors">
+                                            {{ __('Rechazar') }}
+                                        </button>
+                                    </form>
+                                    <form action="{{ route('hr.shift.approve', $sol->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="px-3 py-1.5 bg-green-50 hover:bg-green-100 text-green-700 text-[11px] font-bold rounded-lg transition-colors">
+                                            {{ __('Aprobar') }}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                <!-- Stats Grid -->
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-gutter">
-                    <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 shadow-sm">
-                        <p class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Total Active</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-3xl font-black text-primary">142</span>
-                            <span class="material-symbols-outlined text-secondary" data-icon="groups">groups</span>
-                        </div>
-                    </div>
-                    <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 shadow-sm">
-                        <p class="font-label-sm text-label-sm text-outline uppercase tracking-wider">On Shift</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-3xl font-black text-primary">56</span>
-                            <span class="material-symbols-outlined text-green-700"
-                                data-icon="potted_plant">potted_plant</span>
-                        </div>
-                    </div>
-                    <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 shadow-sm">
-                        <p class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Vacancies</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-3xl font-black text-primary">12</span>
-                            <span class="material-symbols-outlined text-amber-700" data-icon="search">search</span>
-                        </div>
-                    </div>
-                    <div class="bg-surface-container-low p-md rounded-xl border border-outline-variant/30 shadow-sm">
-                        <p class="font-label-sm text-label-sm text-outline uppercase tracking-wider">Training</p>
-                        <div class="flex items-center justify-between mt-2">
-                            <span class="text-3xl font-black text-primary">8</span>
-                            <span class="material-symbols-outlined text-secondary" data-icon="school">school</span>
-                        </div>
-                    </div>
+            @endif
+
+            <!-- Employee List Table -->
+            <div class="bg-white rounded-2xl border border-stone-250 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex justify-between items-center">
+                    <h3 class="font-bold text-stone-800">{{ __('Nómina y Planta de Personal') }}</h3>
                 </div>
-                <!-- Employee CRUD Table -->
-                <div
-                    class="bg-surface-container-lowest rounded-xl shadow-sm border border-outline-variant/20 overflow-hidden">
-                    <div
-                        class="p-md border-b border-stone-100 flex justify-between items-center bg-surface-container-low/50">
-                        <div class="flex gap-4">
-                            <button
-                                class="px-4 py-1.5 rounded-full bg-primary-container text-on-primary-container text-sm font-bold">All
-                                Employees</button>
-                            <button
-                                class="px-4 py-1.5 rounded-full text-stone-500 text-sm font-medium hover:bg-stone-100 transition-colors">Production</button>
-                            <button
-                                class="px-4 py-1.5 rounded-full text-stone-500 text-sm font-medium hover:bg-stone-100 transition-colors">Logistics</button>
-                            <button
-                                class="px-4 py-1.5 rounded-full text-stone-500 text-sm font-medium hover:bg-stone-100 transition-colors">Quality
-                                Control</button>
-                        </div>
-                        <button class="flex items-center gap-1 text-stone-400 hover:text-stone-600 transition-colors">
-                            <span class="material-symbols-outlined text-sm" data-icon="filter_list">filter_list</span>
-                            <span class="text-sm font-medium">Filter</span>
-                        </button>
-                    </div>
+                <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-stone-50/50 border-b border-stone-100">
-                                <th class="px-6 py-4 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-                                    Employee</th>
-                                <th class="px-6 py-4 font-label-sm text-label-sm text-outline uppercase tracking-wider">Role
-                                    &amp; Dept</th>
-                                <th class="px-6 py-4 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-                                    Shift Status</th>
-                                <th class="px-6 py-4 font-label-sm text-label-sm text-outline uppercase tracking-wider">
-                                    Engagement</th>
-                                <th
-                                    class="px-6 py-4 font-label-sm text-label-sm text-outline uppercase tracking-wider text-right">
-                                    Actions</th>
+                            <tr class="bg-stone-50/50 border-b border-stone-100 text-stone-600">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Empleado') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Cargo y Estado') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Línea de Producción') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Salario Mensual') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-right">{{ __('Acciones') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-stone-100">
-                            <tr class="hover:bg-surface-container-low/30 transition-colors group">
-                                <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <img alt="Employee" class="w-10 h-10 rounded-full object-cover shadow-sm"
-                                            data-alt="Portrait of a young artisan chocolate maker in a white chef coat smiling"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuDvYVueCD-6SjoKwLG28kaACYZed82ptmGq87oQaQMF6Gu5wimru4fT9T2YVhNDMmWfuF3-QJMdO4RAZEXB_tTHMbiJShOugYAxaHILO721afTFYwFAqwp29BxYqSlMbkbiSM9mgmaM-eOs-g7tqvvlnJhqQXeDpoLLKRtPhm-ydWiZzp9eh4nRfqoqCMFy2UzOKxq4lzgw-Wv8aKhUX4ZZKdENGFK87xgWXk6HN7V0tLe3HI9ct8UlA3qd3rM_5KMeQmO5EWeaLg" />
-                                        <div>
-                                            <p class="font-label-md text-label-md text-primary">Julian Moreau</p>
-                                            <p class="text-[12px] text-outline">julian.m@artisanal.com</p>
+                            @forelse ($trabajadores as $tr)
+                                <tr class="hover:bg-stone-50/30 transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-9 h-9 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center overflow-hidden border border-outline-variant shadow-inner">
+                                                @if ($tr->user && $tr->user->profile_image)
+                                                    <img src="{{ $tr->user->profile_image }}" alt="Avatar" class="w-full h-full object-cover" />
+                                                @else
+                                                    {{ strtoupper(substr($tr->nombre, 0, 2)) }}
+                                                @endif
+                                            </div>
+                                            <div>
+                                                <p class="font-bold text-stone-850 text-sm">{{ $tr->nombre }} {{ $tr->apellido }}</p>
+                                                <p class="text-xs text-stone-400">{{ $tr->user->email ?? __('Sin Correo') }}</p>
+                                            </div>
                                         </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <p class="font-label-md text-label-md text-primary">Master Chocolatier</p>
-                                    <p class="text-[12px] text-outline">Production • Senior</p>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold border border-green-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                        On Shift
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <div class="w-24 bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-secondary h-full rounded-full" style="width: 92%;"></div>
-                                    </div>
-                                    <p class="text-[10px] text-outline mt-1 font-bold">92% Performance</p>
-                                </td>
-                                <td class="px-6 py-5 text-right">
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
-                                    </button>
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-error transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="delete">delete</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-surface-container-low/30 transition-colors group">
-                                <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <img alt="Employee" class="w-10 h-10 rounded-full object-cover shadow-sm"
-                                            data-alt="Portrait of a female professional in a modern office, wearing a dark blazer and neutral top"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0i-LFf44bjot04jaBDjCrofRSC7SiSdGHCPZz8WIF0wfi6-W0VkQDllXCBb2ZS5aNra9jf2BaIUbOExHKjd2BAzUhYA2_PWwfB7mSJEncU54KX2mG33j7t9ynp9ziFddaiycBnZ0g7zMk4hc9Wde2iyS9_Rqv_JiDdXzymuFo0nl1qhAqhbmi_KfdZkCKbkoT0qsE_BsGxdguTFuX-ux0xn7BIjuM9n-2NuhVTwjU81D7NdP5u1JNaFXQ5KHuky6HQ9XALEmTlw" />
-                                        <div>
-                                            <p class="font-label-md text-label-md text-primary">Elena Rodriguez</p>
-                                            <p class="text-[12px] text-outline">elena.r@artisanal.com</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <p class="font-label-md text-label-md text-primary">Inventory Specialist</p>
-                                    <p class="text-[12px] text-outline">Logistics • Mid-level</p>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-100 text-stone-500 text-xs font-bold border border-stone-200">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-stone-400"></span>
-                                        Off Duty
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <div class="w-24 bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-secondary h-full rounded-full" style="width: 85%;"></div>
-                                    </div>
-                                    <p class="text-[10px] text-outline mt-1 font-bold">85% Performance</p>
-                                </td>
-                                <td class="px-6 py-5 text-right">
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
-                                    </button>
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-error transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="delete">delete</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-surface-container-low/30 transition-colors group">
-                                <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <img alt="Employee" class="w-10 h-10 rounded-full object-cover shadow-sm"
-                                            data-alt="Portrait of a middle aged man with glasses, look like a professional tech supervisor"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuCHwU0PhqQXnmVR58YcqWc6w9QFheFU4NdLlu06kXnq3KUzVY96xLTFvDn58OfFKQxydj6Vb75Dc_BYSdU4bh6EkmAmL8x2aYG2aJU4R-rNlm2hZ-0SZtxK03pBG4qtRogt-Z2gmBJl8fSbXGkGW6PvdUcbP5CoYLh3bKAMJE2fZ7wFwPy890OgkDNssApYMNM3Lle74BRrINdPxSgyEIAKMFgOfXqUwLwNPMO2TvRyLDLgiD2OkIl8m7Csn998zIGbIIsSLkn-OA" />
-                                        <div>
-                                            <p class="font-label-md text-label-md text-primary">Marcus Thorne</p>
-                                            <p class="text-[12px] text-outline">m.thorne@artisanal.com</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <p class="font-label-md text-label-md text-primary">Quality Lead</p>
-                                    <p class="text-[12px] text-outline">QC • Supervisor</p>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-50 text-amber-700 text-xs font-bold border border-amber-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                        On Break
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <div class="w-24 bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-secondary h-full rounded-full" style="width: 98%;"></div>
-                                    </div>
-                                    <p class="text-[10px] text-outline mt-1 font-bold">98% Performance</p>
-                                </td>
-                                <td class="px-6 py-5 text-right">
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
-                                    </button>
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-error transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="delete">delete</span>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr class="hover:bg-surface-container-low/30 transition-colors group">
-                                <td class="px-6 py-5">
-                                    <div class="flex items-center gap-3">
-                                        <img alt="Employee" class="w-10 h-10 rounded-full object-cover shadow-sm"
-                                            data-alt="Portrait of a young diverse male employee in casual professional attire"
-                                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuAcT7pfyG4wNyiIvNqdNhTc3lncmtH0sts40eiNmjnjhpjomaftOd5VQFZ7Ki01jY8nD6Iwb_DpFrAxK98D0xWa2t4DrauaSAp7cb-tO1OC2_cm-LpM1uH8KpA6lJcyASxnq8OcFdoPpkirFjxLVNENliF9WN6HQ1aO0RF2nxv0IbAIYtzI5aIUBlGEv18BXzZF3jup8NZAsTMeP0wZ0UaHjJVNcRLCa4vQT9qId1xgOv7GCrywB8DBHg2MO-g5Vqx_uMGDqDLHGw" />
-                                        <div>
-                                            <p class="font-label-md text-label-md text-primary">Liam Chen</p>
-                                            <p class="text-[12px] text-outline">liam.c@artisanal.com</p>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <p class="font-label-md text-label-md text-primary">Packaging Operator</p>
-                                    <p class="text-[12px] text-outline">Logistics • Junior</p>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <span
-                                        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-50 text-green-700 text-xs font-bold border border-green-100">
-                                        <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-                                        On Shift
-                                    </span>
-                                </td>
-                                <td class="px-6 py-5">
-                                    <div class="w-24 bg-stone-100 h-1.5 rounded-full overflow-hidden">
-                                        <div class="bg-secondary h-full rounded-full" style="width: 76%;"></div>
-                                    </div>
-                                    <p class="text-[10px] text-outline mt-1 font-bold">76% Performance</p>
-                                </td>
-                                <td class="px-6 py-5 text-right">
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-primary transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="edit">edit</span>
-                                    </button>
-                                    <button
-                                        class="p-2 text-stone-400 hover:text-error transition-colors opacity-0 group-hover:opacity-100">
-                                        <span class="material-symbols-outlined" data-icon="delete">delete</span>
-                                    </button>
-                                </td>
-                            </tr>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <p class="font-semibold text-stone-700 text-xs">{{ $tr->cargo }}</p>
+                                        <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold border mt-1 {{ $tr->estado === 'activo' ? 'bg-green-50 text-green-700 border-green-100' : 'bg-red-50 text-red-700 border-red-100' }}">
+                                            {{ ucfirst($tr->estado) }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if ($tr->lineaProduccion)
+                                            <span class="px-3 py-1 bg-amber-50 text-amber-950 font-bold border border-amber-900/10 text-xs rounded-xl">
+                                                {{ $tr->lineaProduccion->nombre }}
+                                            </span>
+                                        @else
+                                            <span class="text-stone-400 text-xs italic">{{ __('Sin asignar') }}</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 font-mono font-bold text-stone-800 text-xs">
+                                        ${{ number_format($tr->salario, 2) }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button onclick="openEditModal({{ json_encode($tr) }})"
+                                            class="p-2 text-stone-400 hover:text-amber-900 transition-colors inline-flex items-center justify-center rounded-lg hover:bg-stone-50">
+                                            <span class="material-symbols-outlined text-lg">edit</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center text-stone-400 text-xs italic">
+                                        {{ __('No se encontraron empleados registrados en la nómina.') }}
+                                    </td>
+                                </tr>
+                            @endforelse
                         </tbody>
                     </table>
-                    <div class="p-4 border-t border-stone-100 flex items-center justify-between bg-stone-50/50">
-                        <p class="text-sm text-stone-500">Showing <span class="font-bold text-primary">4</span> of <span
-                                class="font-bold text-primary">142</span> employees</p>
-                        <div class="flex gap-1">
-                            <button
-                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-400 hover:bg-stone-100 transition-colors">
-                                <span class="material-symbols-outlined text-sm" data-icon="chevron_left">chevron_left</span>
-                            </button>
-                            <button
-                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-primary text-on-primary font-bold text-sm">1</button>
-                            <button
-                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-500 font-medium text-sm">2</button>
-                            <button
-                                class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-stone-100 text-stone-500 font-medium text-sm">3</button>
-                            <button
-                                class="w-8 h-8 flex items-center justify-center rounded-lg border border-stone-200 text-stone-400 hover:bg-stone-100 transition-colors">
-                                <span class="material-symbols-outlined text-sm"
-                                    data-icon="chevron_right">chevron_right</span>
-                            </button>
-                        </div>
-                    </div>
                 </div>
             </div>
+
+            <!-- Admin Action Modals -->
+            <!-- Modal 1: Hire Employee -->
+            <div id="hireModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-stone-900/60 backdrop-blur-sm p-4 overflow-y-auto">
+                <div class="bg-white rounded-3xl border border-stone-200 max-w-xl w-full p-6 shadow-2xl relative my-8">
+                    <button type="button" onclick="document.getElementById('hireModal').classList.add('hidden')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-amber-900 text-2xl">person_add</span>
+                        <h3 class="text-lg font-bold text-primary">{{ __('Contratar y Registrar Operario') }}</h3>
+                    </div>
+                    <form action="{{ route('hr.hire') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Nombre') }}</label>
+                                <input required type="text" name="nombre" placeholder="ej. Carlos" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Apellido') }}</label>
+                                <input required type="text" name="apellido" placeholder="ej. Pérez" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Correo Electrónico') }}</label>
+                            <input required type="email" name="email" placeholder="carlosperez@wonka.com" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Contraseña de Acceso') }}</label>
+                            <input required type="password" name="password" placeholder="••••••••" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Cargo') }}</label>
+                                <input required type="text" name="cargo" placeholder="ej. Mezclador Senior" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Salario Mensual ($)') }}</label>
+                                <input required type="number" step="0.01" min="0" name="salario" placeholder="ej. 1500" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Asignar Línea de Producción (opcional)') }}</label>
+                            <select name="id_linea_produccion" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                <option value="">{{ __('Sin asignar (Almacén/Operaciones generales)') }}</option>
+                                @foreach ($lineas as $l)
+                                    <option value="{{ $l->id }}">{{ $l->nombre }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-2 border-t border-stone-100">
+                            <button type="button" onclick="document.getElementById('hireModal').classList.add('hidden')" class="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold">{{ __('Cancelar') }}</button>
+                            <button type="submit" class="px-6 py-2 bg-amber-900 text-white rounded-xl text-xs font-bold">{{ __('Registrar Contratación') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal 2: Assign Shift -->
+            <div id="assignShiftModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-stone-900/60 backdrop-blur-sm p-4">
+                <div class="bg-white rounded-3xl border border-stone-200 max-w-md w-full p-6 shadow-2xl relative">
+                    <button type="button" onclick="document.getElementById('assignShiftModal').classList.add('hidden')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-amber-900 text-2xl">calendar_month</span>
+                        <h3 class="text-lg font-bold text-primary">{{ __('Asignar Turno de Trabajo') }}</h3>
+                    </div>
+                    <form action="{{ route('hr.shift.assign') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Seleccionar Operario') }}</label>
+                            <select required name="id_trabajador" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                <option value="" disabled selected>{{ __('Seleccionar empleado...') }}</option>
+                                @foreach ($trabajadores as $tr)
+                                    <option value="{{ $tr->id }}">{{ $tr->nombre }} {{ $tr->apellido }} ({{ $tr->cargo }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Seleccionar Horario / Turno') }}</label>
+                            <select required name="id_turno" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                <option value="" disabled selected>{{ __('Seleccionar turno...') }}</option>
+                                @foreach ($turnos as $t)
+                                    <option value="{{ $t->id }}">{{ ucfirst($t->nombre) }} ({{ date('H:i', strtotime($t->hora_inicio)) }} - {{ date('H:i', strtotime($t->hora_fin)) }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Fecha del Turno') }}</label>
+                            <input required type="date" name="fecha" min="{{ date('Y-m-d') }}" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                        </div>
+                        <div class="pt-4 flex justify-end gap-2 border-t border-stone-100">
+                            <button type="button" onclick="document.getElementById('assignShiftModal').classList.add('hidden')" class="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold">{{ __('Cancelar') }}</button>
+                            <button type="submit" class="px-6 py-2 bg-amber-900 text-white rounded-xl text-xs font-bold">{{ __('Asignar Horario') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Modal 3: Edit Employee -->
+            <div id="editModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-stone-900/60 backdrop-blur-sm p-4">
+                <div class="bg-white rounded-3xl border border-stone-200 max-w-xl w-full p-6 shadow-2xl relative">
+                    <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-amber-900 text-2xl">edit_document</span>
+                        <h3 class="text-lg font-bold text-primary">{{ __('Actualizar Expediente de Operario') }}</h3>
+                    </div>
+                    <form id="editForm" action="" method="POST" class="space-y-4">
+                        @csrf
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Nombre') }}</label>
+                                <input required type="text" name="nombre" id="edit_nombre" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Apellido') }}</label>
+                                <input required type="text" name="apellido" id="edit_apellido" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Cargo') }}</label>
+                                <input required type="text" name="cargo" id="edit_cargo" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Salario Mensual ($)') }}</label>
+                                <input required type="number" step="0.01" min="0" name="salario" id="edit_salario" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Línea de Producción') }}</label>
+                                <select name="id_linea_produccion" id="edit_linea" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                    <option value="">{{ __('Sin asignar') }}</option>
+                                    @foreach ($lineas as $l)
+                                        <option value="{{ $l->id }}">{{ $l->nombre }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="flex flex-col gap-1">
+                                <label class="text-xs font-bold text-stone-700">{{ __('Estado Laboral') }}</label>
+                                <select name="estado" id="edit_estado" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                    <option value="activo">{{ __('Activo') }}</option>
+                                    <option value="inactivo">{{ __('Inactivo') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Nueva Contraseña') }} <span class="text-[10px] text-stone-400 font-normal">({{ __('Dejar en blanco para conservar actual') }})</span></label>
+                            <input type="password" name="password" placeholder="••••••••" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                        </div>
+                        <div class="pt-4 flex justify-end gap-2 border-t border-stone-100">
+                            <button type="button" onclick="document.getElementById('editModal').classList.add('hidden')" class="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold">{{ __('Cancelar') }}</button>
+                            <button type="submit" class="px-6 py-2 bg-amber-900 text-white rounded-xl text-xs font-bold">{{ __('Guardar Cambios') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                function openEditModal(trabajador) {
+                    document.getElementById('edit_nombre').value = trabajador.nombre;
+                    document.getElementById('edit_apellido').value = trabajador.apellido;
+                    document.getElementById('edit_cargo').value = trabajador.cargo;
+                    document.getElementById('edit_salario').value = trabajador.salario;
+                    document.getElementById('edit_linea').value = trabajador.id_linea_produccion || "";
+                    document.getElementById('edit_estado').value = trabajador.estado;
+                    
+                    const form = document.getElementById('editForm');
+                    form.action = `/humanresources/employee/${trabajador.id}/update`;
+                    
+                    document.getElementById('editModal').classList.remove('hidden');
+                }
+            </script>
+
+        @elseif (auth()->user()->role === 'employee')
+            <!-- ================= EMPLOYEE LAYOUT ================= -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <h2 class="font-headline-lg text-headline-lg text-primary">{{ __('Mi Horario y Turnos') }}</h2>
+                    <p class="font-body-md text-body-md text-outline mt-1">{{ __('Consulta tus turnos de producción asignados para esta semana y gestiona solicitudes de cambio.') }}</p>
+                </div>
+                <div class="flex gap-3 shrink-0">
+                    <button onclick="document.getElementById('requestShiftModal').classList.remove('hidden')"
+                        class="bg-amber-900 text-white px-5 py-2.5 rounded-xl font-bold hover:bg-amber-800 transition-all flex items-center gap-2 text-xs shadow-md shadow-amber-900/10">
+                        <span class="material-symbols-outlined text-xs">edit_calendar</span>
+                        {{ __('Solicitar Cambio / Cancelación') }}
+                    </button>
+                </div>
+            </div>
+
+            <!-- Employee Info Quick Info Header -->
+            <div class="bg-white p-6 rounded-2xl border border-stone-200 shadow-sm grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div>
+                    <span class="text-xs text-stone-400 uppercase tracking-wider font-bold block">{{ __('Tu Puesto de Trabajo') }}</span>
+                    <strong class="text-amber-950 font-black text-lg mt-1 block">{{ $trabajador->cargo }}</strong>
+                </div>
+                <div>
+                    <span class="text-xs text-stone-400 uppercase tracking-wider font-bold block">{{ __('Tu Salario Registrado') }}</span>
+                    <strong class="text-amber-950 font-black text-lg mt-1 block">${{ number_format($trabajador->salario, 2) }} / mes</strong>
+                </div>
+                <div>
+                    <span class="text-xs text-stone-400 uppercase tracking-wider font-bold block">{{ __('Línea de Producción Asignada') }}</span>
+                    <strong class="text-amber-950 font-black text-lg mt-1 block">
+                        {{ $trabajador->lineaProduccion->nombre ?? __('Operaciones generales / Almacén') }}
+                    </strong>
+                </div>
+            </div>
+
+            <!-- Shifts Assigned Calendar Section -->
+            <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-900">calendar_today</span>
+                    <h3 class="font-bold text-stone-850">{{ __('Calendario de Turnos Asignados') }}</h3>
+                </div>
+                <div class="p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    @forelse ($asignaciones as $asig)
+                        <div class="p-4 rounded-xl border border-stone-150 shadow-sm space-y-2 hover:border-amber-900/30 transition-all">
+                            <span class="text-[10px] font-mono text-stone-400 uppercase tracking-widest block">{{ date('D d M Y', strtotime($asig->fecha)) }}</span>
+                            <h4 class="font-bold text-amber-900 text-sm flex items-center gap-1.5 uppercase">
+                                <span class="w-2 h-2 rounded-full bg-amber-700"></span>
+                                {{ ucfirst($asig->turno->nombre) }}
+                            </h4>
+                            <p class="text-xs text-stone-600 font-medium">
+                                {{ date('h:i A', strtotime($asig->turno->hora_inicio)) }} - {{ date('h:i A', strtotime($asig->turno->hora_fin)) }}
+                            </p>
+                        </div>
+                    @empty
+                        <div class="col-span-full py-12 text-center text-stone-400 text-xs italic">
+                            {{ __('No tienes turnos programados o asignados para esta semana laboral.') }}
+                        </div>
+                    @endforelse
+                </div>
+            </div>
+
+            <!-- Shift Request log -->
+            <div class="bg-white rounded-2xl border border-stone-200 shadow-sm overflow-hidden">
+                <div class="p-6 border-b border-stone-100 bg-stone-50/50 flex items-center gap-2">
+                    <span class="material-symbols-outlined text-amber-900">history</span>
+                    <h3 class="font-bold text-stone-850">{{ __('Historial de Solicitudes Realizadas') }}</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-stone-50/50 border-b border-stone-100 text-stone-600">
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Tipo') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Fecha Solicitada') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Turno Objetivo') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider">{{ __('Motivo Explicado') }}</th>
+                                <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-right">{{ __('Estado') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-100 text-xs font-medium">
+                            @forelse ($solicitudes as $sol)
+                                <tr>
+                                    <td class="px-6 py-4 uppercase font-bold text-stone-700">
+                                        {{ $sol->tipo === 'cambio' ? __('Cambio') : __('Cancelación') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-stone-500 font-mono">
+                                        {{ date('d M Y', strtotime($sol->fecha_deseada)) }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        {{ ucfirst($sol->turnoDeseado->nombre ?? 'N/A') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-stone-500 max-w-xs truncate" title="{{ $sol->motivo }}">
+                                        {{ $sol->motivo ?? __('Sin justificar') }}
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        @if ($sol->estado === 'pendiente')
+                                            <span class="px-2.5 py-1 bg-amber-50 text-amber-800 rounded-full font-bold border border-amber-100 uppercase text-[9px]">{{ __('Pendiente') }}</span>
+                                        @elseif ($sol->estado === 'aprobado')
+                                            <span class="px-2.5 py-1 bg-green-50 text-green-800 rounded-full font-bold border border-green-100 uppercase text-[9px]">{{ __('Aprobado') }}</span>
+                                        @else
+                                            <span class="px-2.5 py-1 bg-red-50 text-red-800 rounded-full font-bold border border-red-100 uppercase text-[9px]">{{ __('Rechazado') }}</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-8 text-center text-stone-400 italic text-[11px]">
+                                        {{ __('No has enviado ninguna solicitud de cambio o cancelación de turno.') }}
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Employee Modals -->
+            <!-- Modal: Request Shift Action -->
+            <div id="requestShiftModal" class="fixed inset-0 z-[100] flex items-center justify-center hidden bg-stone-900/60 backdrop-blur-sm p-4">
+                <div class="bg-white rounded-3xl border border-stone-200 max-w-md w-full p-6 shadow-2xl relative">
+                    <button type="button" onclick="document.getElementById('requestShiftModal').classList.add('hidden')" class="absolute top-4 right-4 text-stone-400 hover:text-stone-600">
+                        <span class="material-symbols-outlined text-xl">close</span>
+                    </button>
+                    <div class="flex items-center gap-2 mb-4">
+                        <span class="material-symbols-outlined text-amber-900 text-2xl">edit_calendar</span>
+                        <h3 class="text-lg font-bold text-primary">{{ __('Solicitud de Modificación de Turno') }}</h3>
+                    </div>
+                    <form action="{{ route('hr.shift.request') }}" method="POST" class="space-y-4">
+                        @csrf
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Tipo de Solicitud') }}</label>
+                            <select required name="tipo" onchange="toggleTurnoSelect(this.value)" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                <option value="cambio">{{ __('Cambiar por otro turno') }}</option>
+                                <option value="cancelacion">{{ __('Cancelar mi turno (Día libre)') }}</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Fecha del Turno a Afectar') }}</label>
+                            <input required type="date" name="fecha_deseada" min="{{ date('Y-m-d') }}" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                        </div>
+                        <div id="turnoDeseadoContainer" class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Turno que Deseas Trabajar') }}</label>
+                            <select name="id_turno_deseado" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none">
+                                @foreach ($turnos as $t)
+                                    <option value="{{ $t->id }}">{{ ucfirst($t->nombre) }} ({{ date('H:i', strtotime($t->hora_inicio)) }} - {{ date('H:i', strtotime($t->hora_fin)) }})</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-xs font-bold text-stone-700">{{ __('Motivo o Justificación') }}</label>
+                            <textarea rows="3" name="motivo" placeholder="{{ __('ej. Tengo una cita médica programada en horas de la mañana.') }}" class="px-3 py-2 border border-stone-200 rounded-xl text-sm focus:border-amber-700 outline-none"></textarea>
+                        </div>
+                        <div class="pt-4 flex justify-end gap-2 border-t border-stone-100">
+                            <button type="button" onclick="document.getElementById('requestShiftModal').classList.add('hidden')" class="px-4 py-2 border border-stone-200 text-stone-600 rounded-xl text-xs font-bold">{{ __('Cancelar') }}</button>
+                            <button type="submit" class="px-6 py-2 bg-amber-900 text-white rounded-xl text-xs font-bold">{{ __('Enviar Solicitud') }}</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <script>
+                function toggleTurnoSelect(type) {
+                    const container = document.getElementById('turnoDeseadoContainer');
+                    if (type === 'cancelacion') {
+                        container.classList.add('hidden');
+                    } else {
+                        container.classList.remove('hidden');
+                    }
+                }
+            </script>
+        @endif
+        
+    </div>
 @endsection

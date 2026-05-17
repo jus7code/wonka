@@ -5,12 +5,9 @@
 <head>
     <meta charset="utf-8" />
     <meta content="width=device-width, initial-scale=1.0" name="viewport" />
-    <title>{{ __('Login | CocoaMaster') }}</title>
+    <title>{{ __('Registro | CocoaMaster') }}</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;900&amp;display=swap"
-        rel="stylesheet" />
-    <link
-        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
         rel="stylesheet" />
     <link
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
@@ -146,7 +143,7 @@
                 data-alt="Detailed macro texture of high-quality dark chocolate shavings with professional studio lighting and warm tones"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuDCq37vot5BWynf_KnW4jOdA-_NBW7d7GWm37UZsEMxnsHGhchoV9a7LYH1R5nMUrEAznQJufHa024lh2UrTgkl3pFtAotyQK01k0_Q2Bmk2Qsm1ujxkVhlhSwbzmM_0KpYmmaJEv0unAJy0RhyLdcsAI38XvolI9aUqqa5XM5I8mq45BA5MCqPTzUiBsJWmCTuvahTZ_Lvb-0meh2i-Y8BGtHM88B_c7V8GOWbBnA_lMnfiLLZLBPu_rac4bL-68K5VLtqM1pv9Q" />
         </div>
-        <!-- Login Form Canvas -->
+        <!-- Register Form Canvas -->
         <div class="w-full lg:w-1/2 flex items-center justify-center p-gutter bg-surface-bright">
             <div class="w-full max-w-md space-y-lg">
                 <!-- Mobile Logo (Hidden on Desktop) -->
@@ -155,12 +152,17 @@
                         data-icon="coffee_maker">coffee_maker</span>
                     <h1 class="font-display-xl text-display-xl text-primary tracking-tighter">CocoaMaster</h1>
                 </div>
+                <div class="space-y-base">
+                    <h2 class="font-headline-lg text-headline-lg text-on-surface">{{ __('Crea una cuenta') }}</h2>
+                    <p class="font-body-md text-body-md text-on-surface-variant">{{ __('regístrate para acceder al sistema WonkaFabric') }}</p>
+                </div>
+
                 <!-- Validation Alerts -->
                 @if ($errors->any())
                     <div class="p-sm rounded-xl bg-error-container text-on-error-container border border-error/20 flex flex-col gap-xs">
                         <div class="flex items-center gap-xs font-semibold">
                             <span class="material-symbols-outlined text-[20px]" data-icon="error">error</span>
-                            <span>{{ __('Error al iniciar sesión') }}</span>
+                            <span>{{ __('Error al registrarse') }}</span>
                         </div>
                         <ul class="text-xs list-disc list-inside opacity-90 pl-xs">
                             @foreach ($errors->all() as $error)
@@ -170,12 +172,12 @@
                     </div>
                 @endif
 
-                <form action="{{ route('login') }}" method="POST" class="space-y-md">
+                <form action="{{ route('register') }}" method="POST" class="space-y-md">
                     @csrf
                     <!-- Username Field -->
                     <div class="space-y-xs">
                         <label class="font-label-md text-label-md text-on-surface-variant ml-xs"
-                            for="username">{{ __('Usuario o Correo') }}</label>
+                            for="name">{{ __('Usuario (Nombre)') }}</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
                                 <span
@@ -184,18 +186,32 @@
                             </div>
                             <input
                                 class="block w-full pl-xl pr-md py-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface placeholder-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all"
-                                id="username" name="username" placeholder="{{ __('ej. charlie_bucket o charlie@wonka.com') }}"
-                                value="{{ old('username') }}" type="text" required />
+                                id="name" name="name" placeholder="{{ __('ej. charlie_bucket') }}"
+                                value="{{ old('name') }}" type="text" required />
                         </div>
                     </div>
+
+                    <!-- Email Field -->
+                    <div class="space-y-xs">
+                        <label class="font-label-md text-label-md text-on-surface-variant ml-xs"
+                            for="email">{{ __('Correo Electrónico') }}</label>
+                        <div class="relative group">
+                            <div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
+                                <span
+                                    class="material-symbols-outlined text-outline group-focus-within:text-secondary transition-colors"
+                                    data-icon="mail">mail</span>
+                            </div>
+                            <input
+                                class="block w-full pl-xl pr-md py-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface placeholder-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all"
+                                id="email" name="email" placeholder="{{ __('charlie@wonka.com') }}"
+                                value="{{ old('email') }}" type="email" required />
+                        </div>
+                    </div>
+
                     <!-- Password Field -->
                     <div class="space-y-xs">
-                        <div class="flex justify-between items-center px-xs">
-                            <label class="font-label-md text-label-md text-on-surface-variant"
-                                for="password">{{ __('Contraseña') }}</label>
-                            <a class="font-label-sm text-label-sm text-secondary hover:underline transition-all"
-                                href="#">{{ __('¿Olvidaste tu contraseña?') }}</a>
-                        </div>
+                        <label class="font-label-md text-label-md text-on-surface-variant ml-xs"
+                            for="password">{{ __('Contraseña') }}</label>
                         <div class="relative group">
                             <div class="absolute inset-y-0 left-0 pl-sm flex items-center pointer-events-none">
                                 <span
@@ -205,36 +221,26 @@
                             <input
                                 class="block w-full pl-xl pr-md py-4 bg-surface-container-lowest border border-outline-variant rounded-xl text-on-surface placeholder-outline-variant focus:outline-none focus:ring-2 focus:ring-secondary/20 focus:border-secondary transition-all"
                                 id="password" name="password" placeholder="••••••••••••" type="password" required />
-                            <div class="absolute inset-y-0 right-0 pr-sm flex items-center cursor-pointer">
-                                <span class="material-symbols-outlined text-outline-variant hover:text-outline"
-                                    data-icon="visibility">visibility</span>
-                            </div>
                         </div>
                     </div>
-                    <!-- Remember Me -->
-                    <div class="flex items-center gap-base ml-xs">
-                        <input
-                            class="h-4 w-4 rounded border-outline-variant text-secondary focus:ring-secondary cursor-pointer"
-                            id="remember" name="remember" type="checkbox" />
-                        <label class="font-label-md text-label-md text-on-surface-variant cursor-pointer select-none"
-                            for="remember">{{ __('Recordarme') }}</label>
-                    </div>
-                    <!-- Login Button -->
+
+                    <!-- Register Button -->
                     <div class="pt-base">
                         <button
                             class="w-full flex justify-center items-center py-4 px-md rounded-xl bg-primary-container text-on-primary font-label-md text-label-md uppercase tracking-widest hover:bg-primary transition-all shadow-sm active:scale-[0.98]"
                             type="submit">
-                            {{ __('Iniciar Sesión') }}
+                            {{ __('Registrarse') }}
                         </button>
                     </div>
-                    <!-- Register Redirect Link -->
+
                     <div class="text-center pt-base">
                         <p class="font-label-sm text-label-sm text-on-surface-variant">
-                            {{ __('¿No tienes una cuenta?') }}
-                            <a href="/register" class="font-semibold text-secondary hover:underline ml-xs">{{ __('Regístrate aquí') }}</a>
+                            {{ __('¿Ya tienes una cuenta?') }}
+                            <a href="/" class="font-semibold text-secondary hover:underline ml-xs">{{ __('Inicia sesión aquí') }}</a>
                         </p>
                     </div>
                 </form>
+
                 <!-- Support Footer -->
                 <div
                     class="pt-lg border-t border-surface-variant flex flex-col sm:flex-row justify-between items-center gap-md">
@@ -246,16 +252,6 @@
                                 data-icon="contact_support">contact_support</span>
                             {{ __('Soporte') }}
                         </button>
-                        <a href="{{ route('locale.switch', ['locale' => 'es']) }}"
-                            class="flex items-center gap-xs font-label-sm text-label-sm {{ session('locale', 'en') === 'es' ? 'text-secondary' : 'text-on-surface-variant hover:text-on-surface' }}">
-                            <span class="material-symbols-outlined text-label-sm" data-icon="language">language</span>
-                            {{ __('Español (CO)') }}
-                        </a>
-                        <a href="{{ route('locale.switch', ['locale' => 'en']) }}"
-                            class="flex items-center gap-xs font-label-sm text-label-sm {{ session('locale', 'en') === 'en' ? 'text-secondary' : 'text-on-surface-variant hover:text-on-surface' }}">
-                            <span class="material-symbols-outlined text-label-sm" data-icon="language">language</span>
-                            EN
-                        </a>
                     </div>
                 </div>
             </div>

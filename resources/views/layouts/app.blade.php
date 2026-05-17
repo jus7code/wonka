@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html class="light" lang="en">
+<html class="light" lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="utf-8" />
@@ -114,16 +114,83 @@
 </head>
 
 <body class="bg-background text-on-background font-body-md min-h-screen flex">
-    @include('layouts.sidebar')
+    @if (auth()->check() && auth()->user()->role === 'client')
+        <!-- Full-screen client view layout (no sidebar) -->
+    @else
+        @include('layouts.sidebar')
+    @endif
     
     <!-- Main Content Area -->
-    <main class="flex-1 md:ml-[280px] flex flex-col min-w-0 min-h-screen">
-        @yield('header')
+    <main class="flex-1 {{ auth()->check() && auth()->user()->role === 'client' ? '' : 'md:ml-[280px]' }} flex flex-col min-w-0 min-h-screen">
+        @if (auth()->check() && auth()->user()->role === 'client')
+            <!-- Client Top Navigation Bar -->
+            <nav class="flex justify-between items-center w-full px-6 py-3 h-16 sticky top-0 z-50 bg-stone-50 dark:bg-stone-900 border-b border-stone-200 dark:border-stone-800 shadow-sm shrink-0">
+                <div class="flex items-center gap-8">
+                    <span class="text-xl font-bold text-amber-900 dark:text-amber-50 tracking-tight">{{ __('Artisanal Logistics') }}</span>
+                    <div class="hidden md:flex gap-6">
+                        <a class="font-inter text-sm font-semibold {{ request()->is('OrderChocolate') ? 'text-amber-700 dark:text-amber-300 border-b-2 border-amber-700 py-1' : 'text-stone-600 hover:text-stone-800' }}" href="/OrderChocolate">{{ __('Catalog') }}</a>
+                    </div>
+                </div>
+                <div class="flex items-center gap-4">
+                    <button class="p-2 text-stone-500 hover:bg-stone-100 rounded-full transition-colors">
+                        <span class="material-symbols-outlined">notifications</span>
+                    </button>
+                    <a href="/profile" class="p-2 text-stone-500 hover:bg-stone-100 rounded-full transition-colors flex items-center justify-center {{ request()->is('profile') ? 'text-amber-700' : '' }}" title="{{ __('Perfil') }}">
+                        <span class="material-symbols-outlined">settings</span>
+                    </a>
+                    <a href="/logout" class="p-2 text-stone-500 hover:bg-stone-100 rounded-full transition-colors flex items-center justify-center" title="{{ __('Cerrar Sesión') }}">
+                        <span class="material-symbols-outlined">logout</span>
+                    </a>
+                    <a href="/profile" class="h-8 w-8 rounded-full bg-amber-800 text-white font-bold flex items-center justify-center overflow-hidden border border-outline-variant shadow-inner shrink-0 text-[11px]" title="{{ __('Mi Perfil') }}">
+                        @if (auth()->check() && auth()->user()->profile_image)
+                            <img alt="User profile" class="w-full h-full object-cover" src="{{ auth()->user()->profile_image }}"/>
+                        @else
+                            {{ auth()->check() ? strtoupper(substr(auth()->user()->name, 0, 2)) : 'CL' }}
+                        @endif
+                    </a>
+                </div>
+            </nav>
+        @else
+            @yield('header')
+        @endif
         
         @yield('content')
     </main>
 
     @yield('scripts')
+
+    @if (auth()->check() && auth()->user()->role === 'admin')
+        <!-- Administrative Header Decorator: Hides search and help spaces for clean sidebar workflow -->
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // 1. Locate and hide search input containers
+                const searchInputs = document.querySelectorAll('header input[placeholder*="Search"], header input[placeholder*="search"], header input[placeholder*="Buscar"], header input[placeholder*="clientes"]');
+                searchInputs.forEach(input => {
+                    const container = input.closest('.relative');
+                    if (container) {
+                        container.style.setProperty('display', 'none', 'important');
+                    } else {
+                        input.style.setProperty('display', 'none', 'important');
+                    }
+                });
+
+                // 2. Locate and hide "Help" buttons, spans, or links
+                const headerElements = document.querySelectorAll('header button, header span, header a');
+                headerElements.forEach(el => {
+                    const text = el.textContent.trim().toLowerCase();
+                    if (text === 'help' || text === 'ayuda') {
+                        el.style.setProperty('display', 'none', 'important');
+                        
+                        // Hide container wrappers (like margin dividers)
+                        const parent = el.parentElement;
+                        if (parent && (parent.classList.contains('mr-6') || parent.classList.contains('mr-4') || parent.classList.contains('border-r') || parent.classList.contains('pr-4'))) {
+                            parent.style.setProperty('display', 'none', 'important');
+                        }
+                    }
+                });
+            });
+        </script>
+    @endif
 </body>
 
 </html>
